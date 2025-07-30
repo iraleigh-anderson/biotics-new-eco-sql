@@ -1,5 +1,5 @@
 library(dplyr)
-
+#####MUST INSERT A SYNONYM_SUBNATIONAL TABLE TO INCLUDE ALT SCI NAMES#######
 ###########################################
 #### PART 1 Ecosystem Element Creation ####
 ###########################################
@@ -177,8 +177,17 @@ example$eco.grp.sql <- paste0(
   trimws(example$com.cdc), 
   "' AND REC_CREATE_USER = 'ida lmh77'), ","'", trimws(example$eco.grp), "', '2025-07-15', 'ida lmh77');"
 )
-  
-  
+#13. INSERT Statements for SYNONYM_SUBNATIONAL
+
+example$syn.sub.sql <- paste0(
+  "INSERT INTO synonym_subnational (ELEMENT_SUBNATIONAL_ID, SCIENTIFIC_NAME_ID, S_SYNONYM_ADD_DATE, REC_CREATE_USER) VALUES (",
+  "(SELECT ELEMENT_SUBNATIONAL_ID FROM element_subnational WHERE S_PRIMARY_COMMON_NAME = '",
+  trimws(example$com.cdc), "' AND REC_CREATE_USER = 'ida lmh77'), ",
+  "(SELECT SCIENTIFIC_NAME_ID FROM scientific_name WHERE SCIENTIFIC_NAME = '", 
+  trimws(example$sci.bec), "' AND REC_CREATE_USER = 'ida lmh77'), ",
+  "'2025-07-15','ida lmh77');"
+)
+
 # Open a connection to the output SQL file
 sql_file <- file("Ecology_Element_Insert.sql", open = "wt")
 # Loop through each row and write the SQL statements in order, with a blank line between sets
@@ -197,6 +206,7 @@ for (i in 1:nrow(example)) {
   writeLines(example$oth.sub.com.sql[i],sql_file)
   writeLines(example$agen.stat.sql[i],sql_file)
   writeLines(example$eco.grp.sql[i],sql_file)
+  writeLines(example$syn.sub.sql[i],sql_file)
   writeLines("", sql_file) # Add a blank line between each set
 }
 # Close the file connection
